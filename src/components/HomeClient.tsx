@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import WelcomeScene from '@/components/WelcomeScene';
-import RegistrationScene from '@/components/RegistrationScene';
 import ChatScene from '@/components/ChatScene';
 import MeetingCoverScene from '@/components/MeetingCoverScene';
 import M1Q1Scene from '@/components/M1Q1Scene';
@@ -25,8 +24,6 @@ import M3Q2Scene from '@/components/M3Q2Scene';
 import M3Q3Scene from '@/components/M3Q3Scene';
 import ClosingScene from '@/components/ClosingScene';
 import Cookies from 'js-cookie';
-import { saveMeetingTwoScore, saveM3Q2Feedback, saveM3Q3Feedback } from '@/app/actions/scoreActions';
-import { supabase } from '@/lib/supabase';
 
 export default function HomeClient() {
   const searchParams = useSearchParams();
@@ -35,6 +32,9 @@ export default function HomeClient() {
   
   // Store all responses in a single state object
   const [responses, setResponses] = useState({
+    m1q1Answer: '',
+    m1q2Answer: '',
+    m1q3Completed: false,
     meetingTwoScore: 0,
     m3q2Essay: '',
     m3q3Motivation: ''
@@ -64,16 +64,9 @@ export default function HomeClient() {
   }, [searchParams]);
 
   // Scene navigation handlers
-  const handleWelcomeNext = () => setCurrentScene('registration');
-  
-  const handleRegistrationBack = () => setCurrentScene('welcome');
-  
-  const handleRegistrationNext = (formData: { name: string; email: string }) => {
-    setUserData(formData);
-    setCurrentScene('chat');
-  };
+  const handleWelcomeNext = () => setCurrentScene('chat');
 
-  const handleChatBack = () => setCurrentScene('registration');
+  const handleChatBack = () => setCurrentScene('welcome');
   
   const handleMeetingCoverBack = () => setCurrentScene('chat');
   
@@ -82,20 +75,35 @@ export default function HomeClient() {
   const handleM1Q1Back = () => setCurrentScene('meeting-cover');
   
   const handleM1Q1Next = (selectedOption: string | null) => {
-    console.log('Selected option:', selectedOption);
+    console.log('M1Q1 - Selected option:', selectedOption);
+    setResponses(prev => ({
+      ...prev,
+      m1q1Answer: selectedOption || ''
+    }));
     setCurrentScene('m1q2');
   };
 
   const handleM1Q2Back = () => setCurrentScene('m1q1');
   
   const handleM1Q2Next = (selectedOption: string | null) => {
-    console.log('Selected option M1Q2:', selectedOption);
+    console.log('M1Q2 - Selected option:', selectedOption);
+    setResponses(prev => ({
+      ...prev,
+      m1q2Answer: selectedOption || ''
+    }));
     setCurrentScene('m1q3');
   };
 
   const handleM1Q3Back = () => setCurrentScene('m1q2');
   
-  const handleM1Q3Next = () => setCurrentScene('meeting-transition');
+  const handleM1Q3Next = () => {
+    console.log('M1Q3 - Drag and drop completed');
+    setResponses(prev => ({
+      ...prev,
+      m1q3Completed: true
+    }));
+    setCurrentScene('meeting-transition');
+  };
 
   const handleMeetingTransitionNext = () => setCurrentScene('meeting2-cover');
 
@@ -201,184 +209,6 @@ export default function HomeClient() {
   };
 
   const handleM3Q3Back = () => setCurrentScene('m3q2');
-  
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
-  // Helper function to get person ID from cookies
-  const getPersonIdFromCookies = async (): Promise<string | null> => {
-    try {
-      const userName = Cookies.get('userName');
-      const userEmail = Cookies.get('userEmail');
-
-      if (!userName || !userEmail) {
-        console.error('User name or email not found in cookies. Available cookies:', 
-          Object.keys(Cookies.get()));
-        return null;
-      }
-
-      const { data, error } = await supabase
-        .from('personal_details')
-        .select('id')
-        .eq('name', userName)
-        .eq('email', userEmail)
-        .limit(1)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching person ID from database:', error);
-        return null;
-      }
-
-      if (!data) {
-        console.error('No user found with the provided credentials');
-        return null;
-      }
-
-      return data.id;
-    } catch (error) {
-      console.error('Unexpected error in getPersonIdFromCookies:', error);
-      return null;
-    }
-  };
-
-  // Function to validate and submit all responses at once
-  // Define the shape of the updates object
-  interface SubmissionUpdates {
-    meeting_two_score?: number;
-    m3q2_essay?: string;
-    m3q3_motivation?: string;
-    [key: string]: unknown; // For any additional dynamic properties
-  }
-
-  const submitAllResponses = async (allResponses: typeof responses) => {
-    setIsSubmitting(true);
-    setSubmitError(null);
-    const errors: string[] = [];
-    const updates: SubmissionUpdates = {};
-
-    try {
-      // 1. First check authentication
-      const personId = await getPersonIdFromCookies();
-      if (!personId) {
-        // Log available cookies for debugging
-        const allCookies = Cookies.get();
-        console.error('Authentication failed. Available cookies:', Object.keys(allCookies));
-        
-        // Try to refresh the auth state
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          console.log('Current auth session:', session ? 'exists' : 'none');
-        } catch (authError) {
-          console.error('Error checking auth session:', authError);
-        }
-        
-        throw new Error('Your session has expired. Please refresh the page and try again.');
-      }
-
-      // 2. Check if all required fields are present
-      const requiredFields = ['meetingTwoScore', 'm3q2Essay', 'm3q3Motivation'];
-      const missingFields = requiredFields.filter(field => !allResponses[field as keyof typeof allResponses]);
-      
-      if (missingFields.length > 0) {
-        const errorMsg = 'Please complete all questions before submitting.';
-        console.log('Missing required fields:', missingFields);
-        return { success: false, error: errorMsg };
-      }
-      
-      // 3. Validate all inputs
-      if (typeof allResponses.meetingTwoScore === 'number') {
-        if (isNaN(allResponses.meetingTwoScore)) {
-          errors.push('Invalid meeting two score');
-        } else {
-          updates.meeting_two_score = allResponses.meetingTwoScore;
-        }
-      }
-      
-      // Validate essay
-      if (allResponses.m3q2Essay?.trim()) {
-        try {
-          const essayResult = await saveM3Q2Feedback(allResponses.m3q2Essay);
-          if (essayResult.error) {
-            errors.push(`Essay validation failed: ${essayResult.error}`);
-          } else if (essayResult.data) {
-            // Convert any camelCase keys to snake_case
-            const snakeCaseData = Object.entries(essayResult.data).reduce<SubmissionUpdates>((acc, [key, value]) => {
-              const snakeKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-              acc[snakeKey as keyof SubmissionUpdates] = value as SubmissionUpdates[keyof SubmissionUpdates];
-              return acc;
-            }, {});
-            Object.assign(updates, snakeCaseData);
-          }
-        } catch (essayError) {
-          console.error('Error validating essay:', essayError);
-          errors.push('Failed to validate essay. Please try again.');
-        }
-      }
-      
-      // Validate motivation
-      if (allResponses.m3q3Motivation?.trim()) {
-        try {
-          const motivationResult = await saveM3Q3Feedback(allResponses.m3q3Motivation);
-          if (motivationResult.error) {
-            errors.push(`Motivation validation failed: ${motivationResult.error}`);
-          } else if (motivationResult.data) {
-            // Convert any camelCase keys to snake_case
-            const snakeCaseData = Object.entries(motivationResult.data).reduce<SubmissionUpdates>((acc, [key, value]) => {
-              const snakeKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-              acc[snakeKey as keyof SubmissionUpdates] = value as SubmissionUpdates[keyof SubmissionUpdates];
-              return acc;
-            }, {});
-            Object.assign(updates, snakeCaseData);
-          }
-        } catch (motivationError) {
-          console.error('Error validating motivation:', motivationError);
-          errors.push('Failed to validate motivation. Please try again.');
-        }
-      }
-
-      // If any validation errors, stop here
-      if (errors.length > 0) {
-        throw new Error(errors.join('\n'));
-      }
-
-      // 4. All validations passed, now save to Supabase
-      try {
-        // Add essay and motivation to updates
-        updates.essay_answer = allResponses.m3q2Essay;
-        updates.motivation_answer = allResponses.m3q3Motivation;
-        
-        const { error } = await supabase
-          .from('score')
-          .upsert({
-            person: personId,
-            ...updates,
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'person'
-          });
-          
-        if (error) {
-          console.error('Database error details:', error);
-          throw new Error('Failed to save your responses. Please try again.');
-        }
-        
-        console.log('All responses submitted successfully');
-        return { success: true };
-      } catch (dbError) {
-        console.error('Database operation failed:', dbError);
-        throw new Error('Failed to save your responses. Please check your connection and try again.');
-      }
-      
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to save responses. Please try again.';
-      console.error('Error in submitAllResponses:', error);
-      setSubmitError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleM3Q3Next = async (motivation: string) => {
     // Store motivation response
@@ -388,18 +218,14 @@ export default function HomeClient() {
     };
     setResponses(updatedResponses);
     
+    // Store responses in localStorage for later submission after registration
     try {
-      // Only submit when test is complete
-      const result = await submitAllResponses(updatedResponses);
-      
-      if (result.success) {
-        setCurrentScene('closing');
-      } else {
-        alert('There was an error saving your responses. Please try again.');
-      }
+      localStorage.setItem('quizResponses', JSON.stringify(updatedResponses));
+      console.log('Quiz responses saved to localStorage:', updatedResponses);
+      setCurrentScene('closing');
     } catch (error) {
-      console.error('Error in handleM3Q3Next:', error);
-      alert('There was an error processing your submission. Please try again.');
+      console.error('Error saving responses to localStorage:', error);
+      alert('There was an error saving your responses. Please try again.');
     }
   };
 
@@ -408,13 +234,6 @@ export default function HomeClient() {
     <main>
       {currentScene === 'welcome' && (
         <WelcomeScene onNext={handleWelcomeNext} />
-      )}
-      
-      {currentScene === 'registration' && (
-        <RegistrationScene 
-          onBack={handleRegistrationBack}
-          onNext={handleRegistrationNext}
-        />
       )}
       
       {currentScene === 'chat' && (

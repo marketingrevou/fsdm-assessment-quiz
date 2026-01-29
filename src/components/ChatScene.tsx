@@ -42,14 +42,14 @@ const ChatScene: React.FC<ChatSceneProps> = ({ userName, onBack, onNext }) => {
   const conversation: Message[] = useMemo(() => [
     { 
       id: 1,
-      text: `Halo aku Ayu, owner dari kafe Kopi & Bunga Melati. Apakah benar ini dengan ${userName || 'Anda'}?`,
+      text: `Halo aku Ayu, owner dari kafe Kopi & Bunga Melati. Saya sedang butuh bantuan di Digital Marketing`,
       sender: 'bot' as const,
       timestamp: new Date(),
-      responses: ['Halo salam kenal! Ada yang bisa aku bantu?']
+      responses: ['Halo salam kenal bu Ayu! Ada yang bisa saya bantu?']
     },
     { 
       id: 2,
-      text: `Oke halo ${userName || 'Anda'}, jadi kami baru buka dan butuh bantuan di bidang Digital Marketing`,
+      text: `Oke halo, jadi kami baru buka dan butuh bantuan di bidang Digital Marketing`,
       sender: 'bot' as const,
       timestamp: new Date()
     },
@@ -58,7 +58,7 @@ const ChatScene: React.FC<ChatSceneProps> = ({ userName, onBack, onNext }) => {
       text: 'Tujuan bisnis kami 6 bulan ke depan:\n1. Meningkatkan interaksi online dengan pelanggan.\n2. Membangun kesadaran merek yang lebih luas di daerah lokal.\n3. Meningkatkan penjualan di toko fisik kami hingga 20%!',
       sender: 'bot' as const,
       timestamp: new Date(),
-      responses: [{ text: 'Menarik sekali, apakah anda sudah punya Social Media?' }]
+      responses: [{ text: 'Menarik sekali, apakah kafe ibu sudah punya Social Media?' }]
     },
     { 
       id: 4,
@@ -69,7 +69,7 @@ const ChatScene: React.FC<ChatSceneProps> = ({ userName, onBack, onNext }) => {
     },
     { 
       id: 5,
-      text: `Sudah, anggaran kami ada di Rp.5.000.000 per bulan, apakah ${userName || 'Anda'} bisa membantu?`,
+      text: `Sudah, anggaran kami ada di Rp.5.000.000 per bulan, apakah bisa?`,
       sender: 'bot' as const,
       timestamp: new Date(),
       responses: [{
@@ -79,7 +79,7 @@ const ChatScene: React.FC<ChatSceneProps> = ({ userName, onBack, onNext }) => {
     },
     { 
       id: 6,
-      text: 'Baik! Aku sudah kirimkan undangan untuk Meeting 1 kita ya, sampai jumpa!',
+      text: 'Baik! Saya sudah kirimkan undangan untuk Meeting 1 kita ya, sampai jumpa!',
       sender: 'bot' as const,
       timestamp: new Date(),
       showInvitation: true

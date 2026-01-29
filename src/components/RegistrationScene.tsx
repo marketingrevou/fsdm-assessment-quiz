@@ -7,19 +7,20 @@ import Cookies from 'js-cookie';
 
 interface RegistrationSceneProps {
   onBack: () => void;
-  onNext: (data: { name: string; email: string }) => void;
+  onNext: (data: { name: string; email: string; whatsapp: string }) => void;
 }
 
 const RegistrationScene: React.FC<RegistrationSceneProps> = ({ onBack, onNext }) => {
   const [isPending, startTransition] = useTransition();
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', whatsapp: '' });
 
   useEffect(() => {
     const storedName = Cookies.get('userName');
     const storedEmail = Cookies.get('userEmail');
+    const storedWhatsapp = Cookies.get('userWhatsapp');
     if (storedName && storedEmail) {
-      setFormData({ name: storedName, email: storedEmail });
+      setFormData({ name: storedName, email: storedEmail, whatsapp: storedWhatsapp || '' });
     }
   }, []);
 
@@ -83,8 +84,25 @@ const RegistrationScene: React.FC<RegistrationSceneProps> = ({ onBack, onNext })
               </div>
               
               <div>
+                <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-1">
+                  Nomor WhatsApp
+                </label>
+                <input
+                  type="tel"
+                  id="whatsapp"
+                  name="whatsapp"
+                  value={formData.whatsapp}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  required
+                  placeholder="0812-3456-7890"
+                  pattern="[0-9]{3,4}-[0-9]{4}-[0-9]{3,4}"
+                />
+              </div>
+              
+              <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email saat mendaftar di RevoU
+                  Email
                 </label>
                 <input
                   type="email"
