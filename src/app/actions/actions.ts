@@ -9,6 +9,10 @@ type LeadgenData = {
   name: string;
   email: string;
   phone: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_content?: string;
   m1q1_answer?: string;
   m1q2_answer?: string;
   m1q3_completed?: boolean;
@@ -108,18 +112,35 @@ export async function createPersonalDetails(formData: FormData) {
   const name = formData.get('name') as string
   const email = formData.get('email') as string
   const whatsapp = formData.get('whatsapp') as string
+  const utm_source = formData.get('utm_source') as string
+  const utm_medium = formData.get('utm_medium') as string
+  const utm_campaign = formData.get('utm_campaign') as string
+  const utm_content = formData.get('utm_content') as string
 
-  console.log('🔍 Debug - createPersonalDetails called with:', { name, email, whatsapp });
+  console.log('🔍 Debug - createPersonalDetails called with:', { name, email, whatsapp, utm_source, utm_medium, utm_campaign, utm_content });
 
   // Only save if all required fields are present
   if (!name || !email || !whatsapp) {
     throw new Error('Name, email, and phone are required')
   }
 
+  // Prepare data with UTM parameters
+  const insertData: Partial<LeadgenData> = { 
+    name, 
+    email, 
+    phone: whatsapp 
+  };
+  
+  // Only add UTM fields if they have values
+  if (utm_source) insertData.utm_source = utm_source;
+  if (utm_medium) insertData.utm_medium = utm_medium;
+  if (utm_campaign) insertData.utm_campaign = utm_campaign;
+  if (utm_content) insertData.utm_content = utm_content;
+
   // Save to leadgen1 table
   const { data, error } = await supabase
     .from('leadgen1')
-    .insert([{ name, email, phone: whatsapp }])
+    .insert([insertData])
     .select()
     .single()
 

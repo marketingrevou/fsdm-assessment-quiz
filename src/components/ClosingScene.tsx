@@ -124,6 +124,14 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName }) => {
 
         // Show success popup
         setShowSuccessPopup(true);
+        
+        // Track Lead event with Meta Pixel
+        if (typeof window !== 'undefined' && 'fbq' in window) {
+          (window as { fbq?: (event: string, action: string, data?: object) => void }).fbq?.('track', 'Lead', {
+            content_name: 'Assessment Form Submission',
+            content_category: 'Lead Generation'
+          });
+        }
       } else {
         console.error('❌ No record was created');
       }

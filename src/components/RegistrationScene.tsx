@@ -14,6 +14,12 @@ const RegistrationScene: React.FC<RegistrationSceneProps> = ({ onBack, onNext })
   const [isPending, startTransition] = useTransition();
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', whatsapp: '' });
+  const [utmParams, setUtmParams] = useState({
+    utm_source: '',
+    utm_medium: '',
+    utm_campaign: '',
+    utm_content: ''
+  });
 
   useEffect(() => {
     const storedName = Cookies.get('userName');
@@ -21,6 +27,18 @@ const RegistrationScene: React.FC<RegistrationSceneProps> = ({ onBack, onNext })
     const storedWhatsapp = Cookies.get('userWhatsapp');
     if (storedName && storedEmail) {
       setFormData({ name: storedName, email: storedEmail, whatsapp: storedWhatsapp || '' });
+    }
+
+    // Capture UTM parameters from URL
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const utmData = {
+        utm_source: urlParams.get('utm_source') || '',
+        utm_medium: urlParams.get('utm_medium') || '',
+        utm_campaign: urlParams.get('utm_campaign') || '',
+        utm_content: urlParams.get('utm_content') || ''
+      };
+      setUtmParams(utmData);
     }
   }, []);
 
@@ -36,6 +54,14 @@ const RegistrationScene: React.FC<RegistrationSceneProps> = ({ onBack, onNext })
       const result = await createPersonalDetails(formData);
       if (!result?.error) {
         setShowSuccessPopup(true);
+        
+        // Track Lead event with Meta Pixel
+        if (typeof window !== 'undefined' && 'fbq' in window) {
+          (window as { fbq?: (event: string, action: string, data?: object) => void }).fbq?.('track', 'Lead', {
+            content_name: 'Registration Form Submission',
+            content_category: 'Lead Generation'
+          });
+        }
       }
     });
   };
@@ -115,6 +141,12 @@ const RegistrationScene: React.FC<RegistrationSceneProps> = ({ onBack, onNext })
                   placeholder="contoh@email.com"
                 />
               </div>
+              
+              {/* Hidden UTM fields */}
+              <input type="hidden" name="utm_source" value={utmParams.utm_source} />
+              <input type="hidden" name="utm_medium" value={utmParams.utm_medium} />
+              <input type="hidden" name="utm_campaign" value={utmParams.utm_campaign} />
+              <input type="hidden" name="utm_content" value={utmParams.utm_content} />
               
               <div className="flex flex-row items-center gap-4 pt-2">
                 <button
