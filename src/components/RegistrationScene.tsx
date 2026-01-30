@@ -38,9 +38,16 @@ const RegistrationScene: React.FC<RegistrationSceneProps> = ({ onBack, onNext })
         utm_campaign: urlParams.get('utm_campaign') || '',
         utm_content: urlParams.get('utm_content') || ''
       };
+      console.log('🔍 UTM Debug - URL params:', window.location.search);
+      console.log('🔍 UTM Debug - Parsed UTM data:', utmData);
       setUtmParams(utmData);
     }
   }, []);
+
+  // Debug: Log when UTM params change
+  useEffect(() => {
+    console.log('🔍 UTM Debug - UTM params updated:', utmParams);
+  }, [utmParams]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -49,8 +56,13 @@ const RegistrationScene: React.FC<RegistrationSceneProps> = ({ onBack, onNext })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('🔍 Form Debug - Current UTM params:', utmParams);
     startTransition(async () => {
       const formData = new FormData(e.target as HTMLFormElement);
+      console.log('🔍 Form Debug - FormData contents:');
+      for (const [key, value] of formData.entries()) {
+        console.log(`  ${key}: ${value}`);
+      }
       const result = await createPersonalDetails(formData);
       if (!result?.error) {
         setShowSuccessPopup(true);
