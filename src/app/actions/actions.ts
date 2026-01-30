@@ -137,17 +137,51 @@ export async function createPersonalDetails(formData: FormData) {
   if (utm_campaign) insertData.utm_campaign = utm_campaign;
   if (utm_content) insertData.utm_content = utm_content;
 
-  // Save to leadgen1 table
-  const { data, error } = await supabase
-    .from('leadgen1')
-    .insert([insertData])
-    .select()
-    .single()
+  console.log('🔍 Debug - Final insertData:', insertData);
 
-  console.log('🔍 Debug - createPersonalDetails result:', { data, error });
+  // Check if record exists first
+  const { data: existingRecord } = await supabase
+    .from('leadgen1')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle()
+
+  let result
+  let error
+
+  if (existingRecord) {
+    // Update existing record with UTM parameters if they exist
+    const updateData: Partial<LeadgenData> = { name, phone: whatsapp }
+    if (utm_source) updateData.utm_source = utm_source;
+    if (utm_medium) updateData.utm_medium = utm_medium;
+    if (utm_campaign) updateData.utm_campaign = utm_campaign;
+    if (utm_content) updateData.utm_content = utm_content;
+
+    const { data: updatedData, error: updateError } = await supabase
+      .from('leadgen1')
+      .update(updateData)
+      .eq('id', existingRecord.id)
+      .select()
+      .single()
+
+    result = updatedData
+    error = updateError
+  } else {
+    // Insert new record
+    const { data: insertedData, error: insertError } = await supabase
+      .from('leadgen1')
+      .insert([insertData])
+      .select()
+      .single()
+
+    result = insertedData
+    error = insertError
+  }
+
+  console.log('🔍 Debug - createPersonalDetails result:', { result, error });
 
   if (error) {
-    console.error('Error inserting personal details:', error)
+    console.error('Error saving personal details:', error)
     return { error }
   }
 
@@ -157,5 +191,5 @@ export async function createPersonalDetails(formData: FormData) {
   cookieStore.set('userEmail', email, { path: '/', maxAge: 60 * 60 * 24 * 7 }) // 1 week
   cookieStore.set('userWhatsapp', whatsapp, { path: '/', maxAge: 60 * 60 * 24 * 7 }) // 1 week
 
-  return { data }
+  return { data: result }
 }
