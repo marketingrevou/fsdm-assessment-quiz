@@ -121,6 +121,11 @@ export async function createPersonalDetails(formData: FormData) {
   const utm_campaign = formData.get('utm_campaign') as string
   const utm_content = formData.get('utm_content') as string
 
+  const meetingTwoScoreRaw = formData.get('meetingTwoScore') as string | null
+  const meetingThreeScoreRaw = formData.get('meetingThreeScore') as string | null
+  const essayAnswer = formData.get('essayAnswer') as string | null
+  const motivationAnswer = formData.get('motivationAnswer') as string | null
+
   console.log('🔍 Debug - createPersonalDetails called with:', { name, email, whatsapp, birthdate, background, utm_source, utm_medium, utm_campaign, utm_content });
 
   // Only save if all required fields are present
@@ -143,6 +148,19 @@ export async function createPersonalDetails(formData: FormData) {
   if (utm_campaign) insertData.utm_campaign = utm_campaign;
   if (utm_content) insertData.utm_content = utm_content;
 
+  if (meetingTwoScoreRaw) {
+    const meetingTwoScore = Number(meetingTwoScoreRaw)
+    if (!Number.isNaN(meetingTwoScore)) insertData.meeting_two_score = meetingTwoScore
+  }
+
+  if (meetingThreeScoreRaw) {
+    const meetingThreeScore = Number(meetingThreeScoreRaw)
+    if (!Number.isNaN(meetingThreeScore)) insertData.meeting_three_score = meetingThreeScore
+  }
+
+  if (essayAnswer?.trim()) insertData.essay_answer = essayAnswer
+  if (motivationAnswer?.trim()) insertData.motivation_answer = motivationAnswer
+
   console.log('🔍 Debug - Final insertData:', insertData);
 
   // Check if record exists first
@@ -162,6 +180,19 @@ export async function createPersonalDetails(formData: FormData) {
     if (utm_medium) updateData.utm_medium = utm_medium;
     if (utm_campaign) updateData.utm_campaign = utm_campaign;
     if (utm_content) updateData.utm_content = utm_content;
+
+    if (meetingTwoScoreRaw) {
+      const meetingTwoScore = Number(meetingTwoScoreRaw)
+      if (!Number.isNaN(meetingTwoScore)) updateData.meeting_two_score = meetingTwoScore
+    }
+
+    if (meetingThreeScoreRaw) {
+      const meetingThreeScore = Number(meetingThreeScoreRaw)
+      if (!Number.isNaN(meetingThreeScore)) updateData.meeting_three_score = meetingThreeScore
+    }
+
+    if (essayAnswer?.trim()) updateData.essay_answer = essayAnswer
+    if (motivationAnswer?.trim()) updateData.motivation_answer = motivationAnswer
 
     const { data: updatedData, error: updateError } = await supabase
       .from('leadgen1')

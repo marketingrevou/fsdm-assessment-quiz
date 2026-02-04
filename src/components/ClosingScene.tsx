@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Cookies from 'js-cookie';
 import { gradeEssayOnly } from '@/app/actions/essayActions';
-import { createPersonalDetails, saveToLeadgen } from '@/app/actions/actions';
+import { createPersonalDetails } from '@/app/actions/actions';
 import { FaCheckCircle, FaTimes } from 'react-icons/fa';
 
 interface ClosingSceneProps {
@@ -49,7 +49,12 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
 
       // Get quiz responses from localStorage
       const quizResponses = localStorage.getItem('quizResponses');
-      let quizData = {};
+      let quizData: {
+        meetingTwoScore?: number;
+        meetingThreeScore?: number;
+        essayAnswer?: string;
+        motivationAnswer?: string;
+      } = {};
       
       if (quizResponses) {
         const responses = JSON.parse(quizResponses);
@@ -57,29 +62,29 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
 
         // Prepare quiz data
         const updateData: {
-          meeting_two_score?: number;
-          meeting_three_score?: number;
-          essay_answer?: string;
-          motivation_answer?: string;
+          meetingTwoScore?: number;
+          meetingThreeScore?: number;
+          essayAnswer?: string;
+          motivationAnswer?: string;
         } = {};
 
         // Add meeting two score if present
         if (responses.meetingTwoScore !== undefined && responses.meetingTwoScore !== 0) {
           console.log('🔍 Debug - Adding meetingTwoScore:', responses.meetingTwoScore);
-          updateData.meeting_two_score = responses.meetingTwoScore;
+          updateData.meetingTwoScore = responses.meetingTwoScore;
         }
 
         // Add essay answer and score if present
         if (responses.m3q2Essay?.trim()) {
           console.log('🔍 Debug - Adding essay answer:', responses.m3q2Essay);
-          updateData.essay_answer = responses.m3q2Essay;
+          updateData.essayAnswer = responses.m3q2Essay;
 
           // Grade the essay using server action
           try {
             const gradedScore = await gradeEssayOnly(responses.m3q2Essay);
             console.log('🔍 Debug - Essay graded score:', gradedScore);
             if (typeof gradedScore === 'number' && !isNaN(gradedScore)) {
-              updateData.meeting_three_score = gradedScore;
+              updateData.meetingThreeScore = gradedScore;
             }
           } catch (error) {
             console.warn('⚠️ Essay grading failed, but saving essay answer anyway:', error);
@@ -89,7 +94,7 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
         // Add motivation answer if present
         if (responses.m3q3Motivation?.trim()) {
           console.log('🔍 Debug - Adding motivation answer:', responses.m3q3Motivation);
-          updateData.motivation_answer = responses.m3q3Motivation;
+          updateData.motivationAnswer = responses.m3q3Motivation;
         }
 
         quizData = updateData;
@@ -121,32 +126,36 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
       formDataToSend.append('birthdate', formData.birthdate);
       formDataToSend.append('background', formData.background);
 
-      const { data, error } = await createPersonalDetails(formDataToSend);
-
-      // Save quiz data separately if it exists
-      if (Object.keys(quizData).length > 0) {
-        try {
-          await saveToLeadgen(quizData);
-        } catch (quizError) {
-          console.warn('⚠️ Quiz data save failed, but main data saved:', quizError);
-        }
+      if (quizData.meetingTwoScore !== undefined) {
+        formDataToSend.append('meetingTwoScore', String(quizData.meetingTwoScore));
+      }
+      if (quizData.meetingThreeScore !== undefined) {
+        formDataToSend.append('meetingThreeScore', String(quizData.meetingThreeScore));
+      }
+      if (quizData.essayAnswer !== undefined) {
+        formDataToSend.append('essayAnswer', quizData.essayAnswer);
+      }
+      if (quizData.motivationAnswer !== undefined) {
+        formDataToSend.append('motivationAnswer', quizData.motivationAnswer);
       }
 
-      console.log('🔍 Debug - Insert result:', { data, error });
+      const { data, error } = await createPersonalDetails(formDataToSend);
 
       if (error) {
         console.error('❌ Error creating record:', error);
         throw error;
       }
 
-      if (data && data.length > 0) {
+      // Store user data in cookies early so subsequent server actions can read them
+      Cookies.set('userName', formData.name);
+      Cookies.set('userEmail', formData.email);
+      Cookies.set('userWhatsapp', formData.whatsapp);
+
+      console.log('🔍 Debug - Insert result:', { data, error });
+
+      if (data) {
         console.log('✅ Record created successfully with all data');
         
-        // Store user data in cookies
-        Cookies.set('userName', formData.name);
-        Cookies.set('userEmail', formData.email);
-        Cookies.set('userWhatsapp', formData.whatsapp);
-
         // Clear quiz responses from localStorage
         if (quizResponses) {
           localStorage.removeItem('quizResponses');
@@ -201,7 +210,7 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
 
         <div className="text-center mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
-            Selamat {userName}! 🎉
+            Selamat! 🎉
           </h2>
           <p className="text-black text-sm sm:text-base">
             Kamu sudah menyelesaikan quiz! Isi data diri kamu untuk melihat hasilnya.
@@ -278,7 +287,7 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
                 <option value="Fresh Graduate">Fresh Graduate</option>
                 <option value="Career Switcher">Career Switcher</option>
                 <option value="Career Break">Career Break</option>
-                <option value="Experience Non-JobSeeker">Experience Non-JobSeeker</option>
+                <option value="Experienced Non-Job Seeker">Experienced Non-Job Seeker</option>
                 <option value="Business Owner">Business Owner</option>
                 <option value="Other">Other</option>
               </select>
