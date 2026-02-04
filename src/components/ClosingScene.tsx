@@ -18,7 +18,7 @@ interface ClosingSceneProps {
 const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [isPending, setIsPending] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', whatsapp: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', whatsapp: '', birthdate: '', background: '' });
 
   useEffect(() => {
     // Check if user already has data in cookies
@@ -27,11 +27,11 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
     const storedWhatsapp = Cookies.get('userWhatsapp');
 
     if (storedName && storedEmail && storedWhatsapp) {
-      setFormData({ name: storedName, email: storedEmail, whatsapp: storedWhatsapp });
+      setFormData({ name: storedName, email: storedEmail, whatsapp: storedWhatsapp, birthdate: '', background: '' });
     }
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -116,6 +116,10 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
       if (utmParams?.utm_medium) formDataToSend.append('utm_medium', utmParams.utm_medium);
       if (utmParams?.utm_campaign) formDataToSend.append('utm_campaign', utmParams.utm_campaign);
       if (utmParams?.utm_content) formDataToSend.append('utm_content', utmParams.utm_content);
+      
+      // Add birthdate and background
+      formDataToSend.append('birthdate', formData.birthdate);
+      formDataToSend.append('background', formData.background);
 
       const { data, error } = await createPersonalDetails(formDataToSend);
 
@@ -238,6 +242,46 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
                 placeholder="081234567890"
                 pattern="[0-9]{10,13}"
               />
+            </div>
+
+            <div>
+              <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 mb-1">
+                Tanggal Lahir (MM/DD/YYYY)
+              </label>
+              <input
+                type="text"
+                id="birthdate"
+                name="birthdate"
+                value={formData.birthdate}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                required
+                placeholder="MM/DD/YYYY"
+                pattern="(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])/\d{4}"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="background" className="block text-sm font-medium text-gray-700 mb-1">
+                Dari pilihan berikut, mana yang paling menggambarkan situasi atau latar belakang kamu saat ini?
+              </label>
+              <select
+                id="background"
+                name="background"
+                value={formData.background}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                required
+              >
+                <option value="" disabled>Pilih salah satu</option>
+                <option value="Student">Student</option>
+                <option value="Fresh Graduate">Fresh Graduate</option>
+                <option value="Career Switcher">Career Switcher</option>
+                <option value="Career Break">Career Break</option>
+                <option value="Experience Non-JobSeeker">Experience Non-JobSeeker</option>
+                <option value="Business Owner">Business Owner</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
 
             <div>
