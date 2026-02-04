@@ -56,7 +56,7 @@ const Meeting2CoverScene: React.FC<Meeting2CoverSceneProps> = ({ userName, onBac
         
         {/* Greeting */}
         <p className="text-gray-700 text-sm sm:text-base px-4">
-          Halo lagi <span className="font-bold text-black">{userName}</span>!<br />
+          Halo lagi!<br />
           Terima kasih banyak atas penjelasan di meeting kemarin ya. Nah, ini kabar terbaru. Kami sudah coba menjalankan iklan di Facebook & Google. Tolong bantu aku mengerti tentang hasil iklan kami ya!
         </p>
       </div>

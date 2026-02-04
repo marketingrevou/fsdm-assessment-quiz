@@ -33,7 +33,7 @@ const MeetingTransitionPopup: React.FC<MeetingTransitionPopupProps> = ({ userNam
         </div>
         
         <p className="text-gray-800 text-base sm:text-lg mb-6 font-medium">
-          Terimakasih {userName}! Hasil diskusi ini akan aku sampaikan ke tim. 
+          Terimakasih! Hasil diskusi ini akan aku sampaikan ke tim. 
           Aku sudah invite kamu ke Meeting selanjutnya untuk menganalisa hasil iklan ini ya.
         </p>
         

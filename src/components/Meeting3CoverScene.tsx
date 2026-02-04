@@ -56,7 +56,7 @@ const Meeting3CoverScene: React.FC<Meeting3CoverSceneProps> = ({ userName, onBac
         
         {/* Greeting */}
         <p className="text-gray-700 text-sm sm:text-base px-4">
-          Apa kabar <span className="font-bold text-black">{userName}</span>?<br />
+          Apa kabar?<br />
           Berkat bantuanmu pelanggan di kafe kami terus bertambah! Keren banget! 
         </p>
       </div>

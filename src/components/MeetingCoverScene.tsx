@@ -56,7 +56,7 @@ const MeetingCoverScene: React.FC<MeetingCoverSceneProps> = ({ userName, onBack,
         
         {/* Greeting */}
         <p className="text-gray-700 text-sm sm:text-base px-4">
-          Halo! Terimakasih sudah hadir disini <span className="font-bold text-black">{userName}</span>!<br />
+          Halo! Terimakasih sudah hadir disini!<br />
           Yuk kita mulai meeting-nya ya!
         </p>
       </div>
