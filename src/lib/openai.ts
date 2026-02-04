@@ -14,7 +14,7 @@ export async function gradeEssay(essayContent: string): Promise<number> {
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini', // You can choose a different model if needed
+      model: 'gpt-4o-mini', // You can choose a different model if needed
       messages: [
         { role: 'system', content: GRADING_RUBRIC },
         { role: 'user', content: essayContent },

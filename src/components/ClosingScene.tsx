@@ -176,18 +176,18 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
   const handleProceed = () => {
     setShowSuccessPopup(false);
     // Open WhatsApp link directly
-    window.open('https://wa.me/6281572915933?text=Halo!%20Saya%20mau%20jadwalkan%20waktu%20konsultasi%20hasil%20assessment%20Digital%20Marketing.', '_blank');
+    window.open('https://wa.me/6281399100086?text=Halo!%20Saya%20mau%20jadwalkan%20waktu%20konsultasi%20hasil%20assessment%20Digital%20Marketing.', '_blank');
   };
 
   return (
-    <div className="h-screen w-full flex flex-col items-center justify-between p-4 bg-white relative overflow-hidden">
+    <div className="h-screen w-full flex flex-col items-center justify-between p-2 sm:p-4 bg-white relative overflow-hidden">
       {/* Yellow background shape */}
       <div className="absolute inset-0 bg-[#FFDE3D] -z-10" style={{
         clipPath: 'polygon(0 0, 100% 0, 100% 50%, 0 50%)'
       }} />
 
       {/* Registration Form */}
-      <div className="w-full max-w-md mx-auto flex flex-col items-center justify-center flex-grow relative z-10 py-2">
+      <div className="w-full max-w-md lg:max-w-lg mx-auto flex flex-col items-center justify-center flex-grow relative z-10 py-2">
         {/* Logo */}
         <div className="w-14 h-14 relative mb-4">
           <Image
@@ -209,7 +209,7 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
         </div>
 
         {/* Form Box */}
-        <div className="w-full bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+        <div className="w-full bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -313,8 +313,8 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
 
       {/* Success Popup */}
       {showSuccessPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden border border-gray-200 shadow-xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md lg:max-w-lg overflow-hidden border border-gray-200 shadow-xl">
             {/* Header */}
             <div className="bg-[#FFDE3D] p-4 flex justify-between items-center">
               <h3 className="text-lg font-bold">Yeay, berhasil!</h3>
