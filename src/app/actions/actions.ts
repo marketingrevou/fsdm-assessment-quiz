@@ -9,6 +9,8 @@ type LeadgenData = {
   name: string;
   email: string;
   phone: string;
+  birthdate?: string;
+  background?: string;
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
@@ -112,23 +114,27 @@ export async function createPersonalDetails(formData: FormData) {
   const name = formData.get('name') as string
   const email = formData.get('email') as string
   const whatsapp = formData.get('whatsapp') as string
+  const birthdate = formData.get('birthdate') as string
+  const background = formData.get('background') as string
   const utm_source = formData.get('utm_source') as string
   const utm_medium = formData.get('utm_medium') as string
   const utm_campaign = formData.get('utm_campaign') as string
   const utm_content = formData.get('utm_content') as string
 
-  console.log('🔍 Debug - createPersonalDetails called with:', { name, email, whatsapp, utm_source, utm_medium, utm_campaign, utm_content });
+  console.log('🔍 Debug - createPersonalDetails called with:', { name, email, whatsapp, birthdate, background, utm_source, utm_medium, utm_campaign, utm_content });
 
   // Only save if all required fields are present
-  if (!name || !email || !whatsapp) {
-    throw new Error('Name, email, and phone are required')
+  if (!name || !email || !whatsapp || !birthdate || !background) {
+    throw new Error('Name, email, phone, birthdate, and background are required')
   }
 
   // Prepare data with UTM parameters
   const insertData: Partial<LeadgenData> = { 
     name, 
     email, 
-    phone: whatsapp 
+    phone: whatsapp,
+    birthdate,
+    background
   };
   
   // Only add UTM fields if they have values
@@ -151,7 +157,7 @@ export async function createPersonalDetails(formData: FormData) {
 
   if (existingRecord) {
     // Update existing record with UTM parameters if they exist
-    const updateData: Partial<LeadgenData> = { name, phone: whatsapp }
+    const updateData: Partial<LeadgenData> = { name, phone: whatsapp, birthdate, background }
     if (utm_source) updateData.utm_source = utm_source;
     if (utm_medium) updateData.utm_medium = utm_medium;
     if (utm_campaign) updateData.utm_campaign = utm_campaign;

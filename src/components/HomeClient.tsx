@@ -30,6 +30,14 @@ export default function HomeClient() {
   const [currentScene, setCurrentScene] = useState('welcome');
   const [userData, setUserData] = useState({ name: '', email: '' });
   
+  // Capture UTM parameters from URL
+  const [utmParams, setUtmParams] = useState({
+    utm_source: '',
+    utm_medium: '',
+    utm_campaign: '',
+    utm_content: ''
+  });
+  
   // Store all responses in a single state object
   const [responses, setResponses] = useState({
     m1q1Answer: '',
@@ -51,6 +59,19 @@ export default function HomeClient() {
     const name = searchParams.get('name');
     const storedName = Cookies.get('userName');
     const storedEmail = Cookies.get('userEmail');
+
+    // Capture UTM parameters from URL
+    const utm_source = searchParams.get('utm_source') || '';
+    const utm_medium = searchParams.get('utm_medium') || '';
+    const utm_campaign = searchParams.get('utm_campaign') || '';
+    const utm_content = searchParams.get('utm_content') || '';
+    
+    setUtmParams({
+      utm_source,
+      utm_medium,
+      utm_campaign,
+      utm_content
+    });
 
     if (storedName && storedEmail) {
       setUserData({ name: storedName, email: storedEmail });
@@ -385,7 +406,7 @@ export default function HomeClient() {
       )}
       
       {currentScene === 'closing' && (
-        <ClosingScene userName={userData.name} />
+        <ClosingScene userName={userData.name} utmParams={utmParams} />
       )}
     </main>
   );

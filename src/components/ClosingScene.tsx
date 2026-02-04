@@ -2,14 +2,20 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Cookies from 'js-cookie';
 import { gradeEssayOnly } from '@/app/actions/essayActions';
-import { supabase } from '@/lib/supabase';
+import { createPersonalDetails, saveToLeadgen } from '@/app/actions/actions';
 import { FaCheckCircle, FaTimes } from 'react-icons/fa';
 
 interface ClosingSceneProps {
   userName: string;
+  utmParams?: {
+    utm_source: string;
+    utm_medium: string;
+    utm_campaign: string;
+    utm_content: string;
+  };
 }
 
-const ClosingScene: React.FC<ClosingSceneProps> = ({ userName }) => {
+const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', whatsapp: '' });
@@ -90,17 +96,37 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName }) => {
         console.log('🔍 Debug - Final quiz data:', quizData);
       }
 
-      // Create single record with all data
-      console.log('🔍 Debug - Creating record with all data...');
-      const { data, error } = await supabase
-        .from('leadgen1')
-        .insert([{
-          name: formData.name,
-          email: formData.email,
-          phone: formData.whatsapp,
-          ...quizData
-        }])
-        .select();
+      // Create single record with all data including UTM parameters
+      console.log('🔍 Debug - Creating record with UTM params...', {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.whatsapp,
+        ...quizData,
+        ...utmParams
+      });
+
+      // Use createPersonalDetails action to save data with UTM parameters
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('whatsapp', formData.whatsapp);
+      
+      // Add UTM parameters if they exist
+      if (utmParams?.utm_source) formDataToSend.append('utm_source', utmParams.utm_source);
+      if (utmParams?.utm_medium) formDataToSend.append('utm_medium', utmParams.utm_medium);
+      if (utmParams?.utm_campaign) formDataToSend.append('utm_campaign', utmParams.utm_campaign);
+      if (utmParams?.utm_content) formDataToSend.append('utm_content', utmParams.utm_content);
+
+      const { data, error } = await createPersonalDetails(formDataToSend);
+
+      // Save quiz data separately if it exists
+      if (Object.keys(quizData).length > 0) {
+        try {
+          await saveToLeadgen(quizData);
+        } catch (quizError) {
+          console.warn('⚠️ Quiz data save failed, but main data saved:', quizError);
+        }
+      }
 
       console.log('🔍 Debug - Insert result:', { data, error });
 
