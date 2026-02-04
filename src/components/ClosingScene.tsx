@@ -189,7 +189,7 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col items-center justify-between p-2 sm:p-4 bg-white relative overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col items-center justify-between p-2 sm:p-4 bg-white relative overflow-y-auto">
       {/* Yellow background shape */}
       <div className="absolute inset-0 bg-[#FFDE3D] -z-10" style={{
         clipPath: 'polygon(0 0, 100% 0, 100% 50%, 0 50%)'
