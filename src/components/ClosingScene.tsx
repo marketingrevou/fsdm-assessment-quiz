@@ -237,6 +237,22 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
             </div>
 
             <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                required
+                placeholder="contoh@email.com"
+              />
+            </div>
+
+            <div>
               <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-1">
                 Nomor WhatsApp
               </label>
@@ -291,22 +307,6 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
                 <option value="Business Owner">Business Owner</option>
                 <option value="Other">Other</option>
               </select>
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                required
-                placeholder="contoh@email.com"
-              />
             </div>
 
             <button
