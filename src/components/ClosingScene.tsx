@@ -29,6 +29,15 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
     if (storedName && storedEmail && storedWhatsapp) {
       setFormData({ name: storedName, email: storedEmail, whatsapp: storedWhatsapp, birthdate: '', background: '' });
     }
+
+    // Track when user enters the ClosingScene page (finished quiz)
+    if (typeof window !== 'undefined' && 'fbq' in window) {
+      (window as { fbq?: (event: string, action: string, data?: object) => void }).fbq?.('track', 'ViewContent', {
+        content_name: 'Quiz Completion Page',
+        content_category: 'Quiz Funnel',
+        content_ids: ['closing_scene']
+      });
+    }
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
