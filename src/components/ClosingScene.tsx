@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Cookies from 'js-cookie';
 import { gradeEssayOnly } from '@/app/actions/essayActions';
 import { createPersonalDetails } from '@/app/actions/actions';
+import { sendMetaConversionEvent } from '@/lib/meta-conversion';
 import { FaCheckCircle, FaTimes } from 'react-icons/fa';
 
 interface ClosingSceneProps {
@@ -36,6 +37,30 @@ const ClosingScene: React.FC<ClosingSceneProps> = ({ userName, utmParams }) => {
         content_name: 'Quiz Completion Page',
         content_category: 'Quiz Funnel',
         content_ids: ['closing_scene']
+      });
+    }
+
+    // Also send server-side ViewContent event for better tracking
+    const storedUserData = {
+      email: storedEmail || '',
+      phone: storedWhatsapp || '',
+      name: storedName || ''
+    };
+
+    // Only send server-side event if we have some user data
+    if (storedUserData.email || storedUserData.phone || storedUserData.name) {
+      sendMetaConversionEvent(
+        'ViewContent',
+        storedUserData,
+        {
+          content_name: 'Quiz Completion Page',
+          content_category: 'Quiz Funnel',
+          content_ids: ['closing_scene']
+        },
+        navigator.userAgent,
+        '' // Client IP will be detected on server side
+      ).catch(error => {
+        console.warn('Failed to send server-side ViewContent event:', error);
       });
     }
   }, []);

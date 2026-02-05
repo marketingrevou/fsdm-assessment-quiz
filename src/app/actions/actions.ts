@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers'
 import { supabase } from '@/lib/supabase'
+import { sendMetaConversionEvent } from '@/lib/meta-conversion'
 
 // Define type for the new leadgen1 table
 type LeadgenData = {
@@ -227,6 +228,25 @@ export async function createPersonalDetails(formData: FormData) {
   cookieStore.set('userName', name, { path: '/', maxAge: 60 * 60 * 24 * 7 }) // 1 week
   cookieStore.set('userEmail', email, { path: '/', maxAge: 60 * 60 * 24 * 7 }) // 1 week
   cookieStore.set('userWhatsapp', whatsapp, { path: '/', maxAge: 60 * 60 * 24 * 7 }) // 1 week
+
+  // Send Lead event to Meta Conversion API
+  try {
+    await sendMetaConversionEvent(
+      'Lead',
+      {
+        email: email,
+        phone: whatsapp,
+        name: name
+      },
+      {
+        content_name: 'Assessment Form Submission',
+        content_category: 'Lead Generation'
+      }
+    )
+  } catch (error) {
+    console.warn('Failed to send Meta conversion event:', error)
+    // Don't fail the entire operation if conversion tracking fails
+  }
 
   return { data: result }
 }
